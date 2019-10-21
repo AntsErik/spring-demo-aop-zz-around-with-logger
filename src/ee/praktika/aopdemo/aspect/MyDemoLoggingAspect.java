@@ -1,6 +1,7 @@
 package ee.praktika.aopdemo.aspect;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,12 +17,14 @@ import ee.praktika.aopdemo.Account;
 @Order( 4 )
 public class MyDemoLoggingAspect {
 
+    private Logger myLogger = Logger.getLogger( getClass().getName() );
+
     @Around( "execution(* ee.praktika.aopdemo.service.*.getFortune(..))" )
     public Object aroundGetFortune( ProceedingJoinPoint theProceedingJoinPoint ) throws Throwable{
 
         //print out which method are we advising on
         String method = theProceedingJoinPoint.getSignature().toShortString();
-        System.out.println( "\n======>>> Executing @Around on method: " + method );
+        myLogger.info( "\n======>>> Executing @Around on method: " + method );
 
         //get the beggining timestamp
         long begin = System.currentTimeMillis();
@@ -34,7 +37,7 @@ public class MyDemoLoggingAspect {
 
         //display the duration for the method to excecute
         long duration = end - begin;
-        System.out.println( "\n========>>> Duration: " + duration / 1000.0 + " seconds." ); //translating milliseconds to seconds
+        myLogger.info( "\n========>>> Duration: " + duration / 1000.0 + " seconds." ); //translating milliseconds to seconds
 
         return result;
 
@@ -45,7 +48,7 @@ public class MyDemoLoggingAspect {
 
         //print out which method are we advising on
         String method = theJoinPoint.getSignature().toShortString();
-        System.out.println( "\n======>>> Executing @After (finally) on method: " + method );
+        myLogger.info( "\n======>>> Executing @After (finally) on method: " + method );
     }
 
     @AfterThrowing( pointcut = "execution(* ee.praktika.aopdemo.dao.AccountDAO.findAccounts(..))", throwing = "theExc" )
@@ -53,10 +56,10 @@ public class MyDemoLoggingAspect {
 
         //print out which method we are advising on
         String method = theJoinPoint.getSignature().toShortString();
-        System.out.println( "\n======>>> Executing @AfterThrowing on method: " + method );
+        myLogger.info( "\n======>>> Executing @AfterThrowing on method: " + method );
 
         //log the exception
-        System.out.println( "\n======>>> Exceptiong is: " + theExc );
+        myLogger.info( "\n======>>> Exceptiong is: " + theExc );
     }
 
     @AfterReturning( pointcut = "execution(* ee.praktika.aopdemo.dao.AccountDAO.findAccounts(..))", returning = "result" )
@@ -65,17 +68,17 @@ public class MyDemoLoggingAspect {
 
         //print out which method are we advising on
         String method = theJoinPoint.getSignature().toShortString();
-        System.out.println( "\n======>>> Executing @AfterReturning on method: " + method );
+        myLogger.info( "\n======>>> Executing @AfterReturning on method: " + method );
 
         //print out the result of the method call
-        System.out.println( "\n======>>> result is: " + result );
+        myLogger.info( "\n======>>> result is: " + result );
 
         //watn to post-process the data and modify it, before it makes back to caller
 
         //convert the account name to all uppercase
         convertAccountNamesToUpperCase( result );
 
-        System.out.println( "\n======>>> result is: " + result );
+        myLogger.info( "\n======>>> result is: " + result );
 
     }
 
@@ -95,12 +98,12 @@ public class MyDemoLoggingAspect {
 
     @Before( "ee.praktika.aopdemo.aspect.AopExpressions.referencePointcutIgnoreGetSet()" )
     public void beforeAddAccountAdvice( JoinPoint theJoinPoint ){
-        System.out.println( "\n======>>> Executing @Before advice on addAccount() in the DAO package" );
+        myLogger.info( "\n======>>> Executing @Before advice on addAccount() in the DAO package" );
 
         //display the method signature
         MethodSignature methodSignature = (MethodSignature)theJoinPoint.getSignature();
 
-        System.out.println( "Method: " + methodSignature );
+        myLogger.info( "Method: " + methodSignature );
 
         //display the method arguments that are being passed in
 
@@ -109,14 +112,14 @@ public class MyDemoLoggingAspect {
 
         //looping through the arguments and printing them out
         for( Object tempArg : args ) {
-            System.out.println( tempArg );
+            myLogger.info( tempArg.toString() );
 
             if( tempArg instanceof Account ) {
                 //downcast and print Account specific stuff
                 Account theAccount = (Account)tempArg;
 
-                System.out.println( "Account name: " + theAccount.getName() );
-                System.out.println( "Level name: " + theAccount.getLevel() );
+                myLogger.info( "Account name: " + theAccount.getName() );
+                myLogger.info( "Level name: " + theAccount.getLevel() );
             }
         }
     }
